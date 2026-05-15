@@ -1,4 +1,4 @@
-﻿# cswitch-deepseek
+﻿# ccswitch-deepseek
 
 [中文](README.md)
 
