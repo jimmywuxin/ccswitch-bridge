@@ -1,30 +1,20 @@
-# cswitch-deepseek
+﻿# cswitch-deepseek
 
-让 Codex CLI / Codex 桌面客户端通过 DeepSeek 模型运行。
+[English](README_EN.md)
 
-Codex 使用 Responses API 协议，而 DeepSeek 只提供 Chat Completions API。本项目在本地启动一个协议翻译代理，在两者之间无缝转换。
+---
 
-## 架构
+让 Codex CLI 通过 DeepSeek 模型运行。
 
-```
-Codex 客户端 ──Responses API──▶ app.js :11435 ──Chat API──▶ api.deepseek.com
-                                  协议翻译
-```
-
-## 前置条件
-
-- Node.js >= 18
-- DeepSeek API Key（[获取地址](https://platform.deepseek.com/api_keys)）
+Codex 使用 OpenAI Responses API 协议，DeepSeek 只提供 Chat Completions API。本项目在本地启动一个协议翻译代理，在两者之间无缝转换。
 
 ## 快速开始
 
-### 1. 安装依赖
+安装依赖：
 
 ```bash
 npm install
 ```
-
-### 2. 配置 API Key
 
 编辑 `.env`：
 
@@ -32,83 +22,61 @@ npm install
 api_key=sk-your-deepseek-api-key
 ```
 
-### 3. 启动代理服务
+启动：
 
 ```bash
 npm start
 ```
 
-输出：
+## 文件结构
 
-```
-========================================
-  Codex DeepSeek Proxy (Node.js)
-========================================
-  Address:   http://127.0.0.1:11435
-  Endpoint:  http://127.0.0.1:11435/v1/responses
-  Upstream:  DeepSeek API
-  Model:     deepseek-v4-pro
-========================================
-```
+| 文件 | 说明 |
+|------|------|
+| `index.js` | HTTP 服务主入口 |
+| `lib/log.js` | 彩色日志工具 |
+| `lib/translate.js` | 输入翻译 (Responses -> Chat) |
+| `lib/sse.js` | SSE 事件翻译 (Chat -> Responses) |
+| `lib/recover.js` | reasoning_content 自动记忆与补回 |
+| `test_translate.js` | 翻译逻辑单元测试 (33 用例) |
 
-### 4. 配置 CCSwitch
+## 翻译覆盖
 
-CCSwitch 桌面应用中，API 地址填写：
+### 输入 (Responses -> Chat Completions)
 
-```
-http://127.0.0.1:11435/v1
-```
+- message items (`input_text` / `output_text` / `reasoning_text`)
+- `function_call` -> assistant `tool_calls`
+- `function_call_output` -> `tool` message
+- `reasoning` items（跳过，保留 `reasoning_content`）
+- `developer` role -> `system`
+- `input_image` -> `image_url`（多模态）
+- `input_file` / `input_audio` -> 跳过统计
 
-CCSwitch 会引导 Codex 客户端将请求发送到本地代理。
+### 输出 (Chat Completions -> Responses SSE)
 
-## Codex CLI 用户
+- `response.created` / `in_progress` / `completed`
+- `output_item.added` / `done`
+- `output_text.delta` / `done` + `content_part.added` / `done`
+- `reasoning_text.delta` / `done` + `content_part.added` / `done`
+- `function_call_arguments.delta` / `done`
+- `usage` token 统计（`response.completed` 中）
 
-如果直接使用 Codex CLI（不通过 CCSwitch），编辑 `~/.codex/config.toml`：
+### 请求参数
 
-```toml
-[model_providers.deepseek]
-base_url = "http://127.0.0.1:11435/v1"
-wire_api = "responses"
-requires_openai_auth = false
-stream_idle_timeout_ms = 300000
+- `instructions` -> system message
+- `temperature` / `top_p` / `max_output_tokens` 透传
+- `tools` / `tool_choice` 翻译
+- `thinking` / `reasoning` -> DeepSeek thinking 模式
+- `reasoning_content` 跨轮次自动补回
 
-[profiles.deepseek-v4-pro]
-model_provider = "deepseek"
-model_name = "deepseek-v4-pro"
-context_window = 1000000
-max_output_tokens = 32768
-
-[profiles.deepseek-v4-pro.features]
-tool_search = false
-tool_search_always_defer_mcp_tools = false
-```
-
-使用：
+## 运行测试
 
 ```bash
-codex --profile deepseek-v4-pro
+npm run test:translate
 ```
 
-## 环境变量
-
-| 变量 | 默认值 | 说明 |
-|------|--------|------|
-| `api_key` | - | DeepSeek API Key（必填） |
-| `DEEPSEEK_PROXY_HOST` | `127.0.0.1` | 代理监听地址 |
-| `DEEPSEEK_PROXY_PORT` | `11435` | 代理监听端口 |
-| `DEEPSEEK_MODEL` | `deepseek-v4-pro` | 默认模型 |
-| `DEEPSEEK_THINKING` | `disabled` | 思考模式（`enabled` / `disabled`） |
-| `DEEPSEEK_REASONING_EFFORT` | `medium` | 推理深度（`low` / `medium` / `high`） |
-
-## 功能
-
-- **协议翻译**：Responses API ↔ Chat Completions 双向转换
-- **工具过滤**：DeepSeek 限制 128 个工具，超出时自动按域名关键词优先级裁剪
-- **命名空间处理**：自动处理 MCP 工具命名空间（`gmail___search_emails` 等）
-- **DSML 恢复**：修复 DeepSeek 将工具调用以纯文本格式泄露的问题
-- **角色映射**：自动将 OpenAI `developer` role 映射为 `system`
-- **内容格式翻译**：`input_text` / `output_text` → `text`
+33 个翻译逻辑单元测试，不依赖网络。
 
 ## License
 
 ISC
+
