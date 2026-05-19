@@ -3,18 +3,17 @@
     "version": "1.0.0",
     "description": "Codex CLI DeepSeek/MiniMax protocol translation proxy",
     "type": "module",
-    "main": "index.deepseek.js",
     "scripts": {
         "start:deepseek": "node index.deepseek.js",
         "start:minimax": "node index.minimax.js",
         "start": "node index.deepseek.js",
         "start:all": "node index.deepseek.js & node index.minimax.js & wait",
         "stop:all": "pkill -f 'node index.deepseek.js' && pkill -f 'node index.minimax.js'",
-        "pm2:start": "pm2 start pm2.config.js",
+        "pm2:start": "pm2 start pm2.config.cjs",
         "pm2:stop": "pm2 stop all",
         "pm2:restart": "pm2 restart all",
         "pm2:logs": "pm2 logs",
-        "test": "node --test tests/",
+        "test": "node --test test_translate.js",
         "test:translate": "node --test test_translate.js"
     },
     "keywords": [
@@ -30,11 +29,7 @@
     "license": "ISC",
     "dependencies": {
         "axios": "^1.16.0",
-        "better-sqlite3": "^12.9.0",
-        "cors": "^2.8.6",
-        "dotenv": "^17.4.2",
-        "express": "^5.2.1",
-        "openai": "^6.37.0"
+        "dotenv": "^17.4.2"
     },
     "devDependencies": {
         "pm2": "^5.4.0"
