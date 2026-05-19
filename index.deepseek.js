@@ -1,7 +1,10 @@
+import { modelsHandler } from "./lib/models.js";
 ﻿import http from "node:http";
 import https from "node:https";
-import dotenv from "dotenv";
-dotenv.config();
+import { readFileSync } from "node:fs";
+process.env._ENV_LOADED = "1";
+const _envRaw = readFileSync(new URL(".env", import.meta.url), "utf8");
+for (const l of _envRaw.split(/[\r\n]+/)) { const i = l.indexOf("="); if (i > 0 && !l.startsWith("#")) { const k = l.slice(0,i).trim(); if (!process.env._ENV_OVERRIDE || process.env["_OVERRIDE_"+k]) process.env[k] = l.slice(i+1).trim(); } }
 
 import log from "./lib/log.js";
 import { translateMessages, translateTools, translateToolChoice, lastUserText } from "./lib/translate.js";
@@ -65,12 +68,13 @@ const server = http.createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") { res.writeHead(204); return res.end(); }
   const url = new URL(req.url, "http://" + req.headers.host);
+  if (req.method === "GET" && (url.pathname === "/v1/models" || url.pathname === "/models")) { return modelsHandler(req, res, MODEL); }
   if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/v1" || url.pathname === "/health")) { res.writeHead(200, { "Content-Type": "application/json" }); return res.end(JSON.stringify({ service: "ccswitch-deepseek", model: MODEL, status: "ok", port: PORT })); }
   if (req.method === "POST" && (url.pathname === "/v1/responses" || url.pathname === "/responses")) { try { const raw = await readBody(req); const body = JSON.parse(raw); const { chatBody, stream, messages } = buildChatBody(body); const sk = sessionKey(body);
     const dsReq = https.request({ hostname: "api.deepseek.com", path: "/v1/chat/completions", method: "POST", timeout: 300000, headers: { "Authorization": "Bearer " + DEEPSEEK_API_KEY, "Content-Type": "application/json", Accept: stream ? "text/event-stream" : "application/json" } }, (dsRes) => {
       if (dsRes.statusCode !== 200) { let errBody = ""; dsRes.on("data", c => errBody += c); dsRes.on("end", () => { log.err("DeepSeek " + dsRes.statusCode + ": " + errBody.slice(0,300)); res.writeHead(dsRes.statusCode >= 500 ? 502 : dsRes.statusCode, { "Content-Type": "application/json" }); res.end(JSON.stringify({ error: { type: "upstream_error", code: "deepseek_" + dsRes.statusCode, message: "DeepSeek " + dsRes.statusCode + ": " + errBody.slice(0,200) } })); }); return; }
       if (!stream) { let data = ""; dsRes.on("data", c => data += c); dsRes.on("end", () => { try { const completion = JSON.parse(data); if (completion.choices?.[0]?.message?.reasoning_content) { rememberReasoning(sk, [completion.choices[0].message]); } const response = buildNonStreamResponse(completion); if (completion.usage) log.toks(completion.usage.prompt_tokens, completion.usage.completion_tokens, completion.usage.total_tokens); res.writeHead(200, { "Content-Type": "application/json" }); res.end(JSON.stringify(response)); } catch (e) { log.err("parse: " + e.message); res.writeHead(502); res.end(JSON.stringify({ error: { message: e.message } })); } }); return; }
-      res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" }); const translator = new SseTranslator(res); let buf = "";
+      res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" }); const translator = new SseTranslator(res, MODEL); let buf = "";
       dsRes.on("data", (chunk) => { buf += chunk.toString(); const ls = buf.split("\n"); buf = ls.pop() ?? ""; for (const line of ls) { if (!line.startsWith("data: ")) continue; const json = line.slice(6).trim(); if (json === "[DONE]") continue; try { translator.feed(JSON.parse(json)); } catch (_) {} } });
       dsRes.on("end", () => { if (buf.trim()) { for (const line of buf.split("\n")) { if (!line.startsWith("data: ")) continue; if (line.slice(6).trim() === "[DONE]") continue; try { translator.feed(JSON.parse(line.slice(6).trim())); } catch (_) {} } } if (translator.reasoningSoFar) { rememberReasoning(sk, [{ role: "assistant", content: translator.contentSoFar, reasoning_content: translator.reasoningSoFar }]); } translator.done(null); });
       dsRes.on("error", (e) => { log.err("upstream: " + e.message); translator.error(e.message); });
