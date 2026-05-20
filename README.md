@@ -46,17 +46,27 @@ MINIMAX_API_KEY=your-minimax-api-key
 
 ### 3. 启动服务
 
-**推荐：SwiftBar 菜单栏切换**
+#### 方式一：SwiftBar 菜单栏切换（推荐）
 
-点击菜单栏的 🧠 图标即可一键切换模型：
+1. 安装 [SwiftBar](https://swiftbar.app/)（`brew install --cask swiftbar`）
+2. 创建 SwiftBar 插件目录（如 `~/SwiftBar`），并在 SwiftBar 偏好设置中选择该目录
+3. 将 `swiftbar/ccswitch.5s.sh` 复制到 SwiftBar 插件目录：
 
-- 🌊 DeepSeek — 切换到 DeepSeek（11435 端口）
-- 🔶 MiniMax — 切换到 MiniMax（11436 端口）
-- 🔄 Restart Current — 重启当前模型
+   ```bash
+   cp swiftbar/ccswitch.5s.sh ~/SwiftBar/
+   ```
 
-切换后请新开 Codex 会话窗口（会话与模型绑定，不支持同窗口热切换）。
+4. 点击菜单栏 🧠 图标即可管理模型：
 
-**备用：npm 手动启动**
+   - 🌊 **DeepSeek** — 启动 DeepSeek（11435 端口）
+   - 🔶 **MiniMax** — 启动 MiniMax（11436 端口）
+   - 🔄 **Restart** — 重启当前模型
+   - 🛑 **Stop** — 停止运行中的模型
+   - 📋 **View Log** — 查看运行日志
+
+   注意：切换模型后请新开 Codex 会话窗口（会话与模型绑定，不支持同窗口热切换）。
+
+#### 方式二：npm 手动启动
 
 ```bash
 npm run start:deepseek   # 仅 DeepSeek，11435
