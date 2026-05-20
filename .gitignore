@@ -1,7 +1,6 @@
 ﻿.claude/
 .env
 node_modules/
-package-lock.json
 
 # 临时/调试文件
 _launch.cjs

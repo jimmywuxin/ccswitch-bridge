@@ -6,9 +6,21 @@
 # <xbar.dependencies>bash,node,lsof</xbar.dependencies>
 # <xbar.abouturl>https://github.com/jimmywuxin/ccswitch-bridge</xbar.abouturl>
 
-PROJECT_DIR="$HOME/ccswitch-bridge"
+# Auto-detect project directory relative to this script
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# If installed via SwiftBar plugin dir, the script is a symlink/copy.
+# Try: same dir as script, then one level up (if script is in swiftbar/ subdir)
+if [ -f "$SCRIPT_DIR/package.json" ] && [ -f "$SCRIPT_DIR/index.deepseek.js" ]; then
+    PROJECT_DIR="$SCRIPT_DIR"
+elif [ -f "$(dirname "$SCRIPT_DIR")/package.json" ] && [ -f "$(dirname "$SCRIPT_DIR")/index.deepseek.js" ]; then
+    PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+else
+    PROJECT_DIR="$HOME/ccswitch-bridge"
+fi
+
 PORT_DEEPSEEK=11435
 PORT_MINIMAX=11436
+HEALTH_CHECK_INTERVAL=30  # seconds between health checks
 
 running_on_port() {
     lsof -iTCP:"$1" -sTCP:LISTEN -P -n -t 2>/dev/null
@@ -16,15 +28,6 @@ running_on_port() {
 
 human_status() {
     [ -n "$(running_on_port "$1")" ] && echo "✅" || echo "❌"
-}
-
-current_model() {
-    local d=$(running_on_port "$PORT_DEEPSEEK") m=$(running_on_port "$PORT_MINIMAX")
-    if   [ -n "$d" ] && [ -n "$m" ]; then echo "both"
-    elif [ -n "$d" ]; then echo "deepseek"
-    elif [ -n "$m" ]; then echo "minimax"
-    else echo "none"
-    fi
 }
 
 start_model() {
@@ -35,6 +38,7 @@ start_model() {
     fi
     cd "$PROJECT_DIR" || exit 1
     nohup node "$script" > /tmp/ccswitch-${name}.log 2>&1 &
+    echo $! > "/tmp/ccswitch-${name}.pid"
     osascript -e "display notification \"${name} started on port ${port}\" with title \"CCSwitch\"" &
 }
 
@@ -51,6 +55,7 @@ stop_model() {
     if [ -n "$(running_on_port "$port")" ]; then
         kill -9 "$pid" 2>/dev/null
     fi
+    rm -f "/tmp/ccswitch-${name}.pid"
     osascript -e "display notification \"${name} stopped\" with title \"CCSwitch\"" &
 }
 
@@ -63,14 +68,29 @@ restart_model() {
     start_model "$name" "$script" "$port"
 }
 
+# Health check: auto-restart crashed services
+health_check() {
+    local name="$1" script="$2" port="$3"
+    local pid_file="/tmp/ccswitch-${name}.pid"
+    if [ -f "$pid_file" ]; then
+        local saved_pid=$(cat "$pid_file")
+        if ! running_on_port "$port" > /dev/null; then
+            # Service was running but port is gone → restart
+            stop_model "$name" "$port"
+            sleep 1
+            start_model "$name" "$script" "$port"
+        fi
+    fi
+}
+
 # --- menu ---
 echo "🧠"
 echo "---"
 echo "DeepSeek :11435  $(human_status "$PORT_DEEPSEEK") | font=menlo size=11"
 echo "MiniMax  :11436  $(human_status "$PORT_MINIMAX")  | font=menlo size=11"
 echo "---"
-echo "🌊 DeepSeek | bash='$0' param1=start param2=deepseek refresh=true terminal=false"
-echo "🔶 MiniMax  | bash='$0' param1=start param2=minimax refresh=true terminal=false"
+echo "🌊 Start DeepSeek | bash='$0' param1=start param2=deepseek refresh=true terminal=false"
+echo "🔶 Start MiniMax  | bash='$0' param1=start param2=minimax refresh=true terminal=false"
 echo "---"
 echo "🔄 Restart DeepSeek | bash='$0' param1=restart param2=deepseek refresh=true terminal=false"
 echo "🔄 Restart MiniMax  | bash='$0' param1=restart param2=minimax refresh=true terminal=false"
@@ -105,4 +125,9 @@ case "$1" in
             deepseek) cat /tmp/ccswitch-deepseek.log 2>/dev/null || echo "(empty)"; echo; echo "=== following ==="; tail -f /tmp/ccswitch-deepseek.log ;;
             minimax)  cat /tmp/ccswitch-minimax.log 2>/dev/null  || echo "(empty)"; echo; echo "=== following ==="; tail -f /tmp/ccswitch-minimax.log ;;
         esac ;;
+    *)
+        # No action specified: run health checks silently in background
+        health_check "deepseek" "index.deepseek.js" "$PORT_DEEPSEEK" &
+        health_check "minimax"  "index.minimax.js"  "$PORT_MINIMAX" &
+        ;;
 esac
