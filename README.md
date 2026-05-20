@@ -46,36 +46,18 @@ MINIMAX_API_KEY=your-minimax-api-key
 
 ### 3. 启动服务
 
-**方式一：手动双开（前台）**
-```bash
-npm run start:all
-```
-同时启动两个版本，终端被占用。
+**推荐：SwiftBar 菜单栏切换**
 
-**方式二：后台运行（pm2，推荐）**
-```bash
-# 安装 pm2（首次）
-npm install pm2 -g
+点击菜单栏的 🧠 图标即可一键切换模型：
 
-# 启动
-npm run pm2:start
+- 🌊 DeepSeek — 切换到 DeepSeek（11435 端口）
+- 🔶 MiniMax — 切换到 MiniMax（11436 端口）
+- 🔄 Restart Current — 重启当前模型
 
-# 查看状态
-pm2 status
+切换后请新开 Codex 会话窗口（会话与模型绑定，不支持同窗口热切换）。
 
-# 查看日志
-npm run pm2:logs
+**备用：npm 手动启动**
 
-# 重启
-npm run pm2:restart
-
-# 停止
-npm run pm2:stop
-```
-
-pm2 会在后台运行，重启电脑后自动恢复。
-
-**单独启动某一版本**
 ```bash
 npm run start:deepseek   # 仅 DeepSeek，11435
 npm run start:minimax    # 仅 MiniMax，11436
@@ -148,6 +130,8 @@ codex --profile minimax-text-01  # MiniMax
 | `MINIMAX_PROXY_PORT` | `11436` | MiniMax 版监听端口 |
 
 ## 功能
+
+- **⚠️ 会话与模型绑定**：Codex 的每个会话窗口是有状态的（携带 tool call 历史、reasoning 缓存等上下文）。如果在同一个会话窗口中途切换到不同模型（例如从 DeepSeek 切换为 MiniMax），旧会话的历史数据可能无法被新模型正确解析，导致 `400` 错误。**规则：一个会话窗口 = 一个固定模型，切换模型 = 新开会话窗口。**
 
 - **协议翻译**：Responses API ↔ Chat Completions 双向转换
 - **双版本共存**：DeepSeek 和 MiniMax 同时运行，各用各的端口

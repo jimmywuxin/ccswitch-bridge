@@ -152,6 +152,8 @@ codex --profile minimax-text-01  # MiniMax
 | `MINIMAX_PROXY_PORT` | `11436` | MiniMax version listen port |
 
 ## Features
+- **⚠️ Session-Model Binding**: Each Codex session window is stateful (carrying tool call history, reasoning cache, etc.). Switching models mid-session (e.g. DeepSeek → MiniMax) may cause `400` errors because the old history is incompatible with the new model. **Rule: one session = one fixed model. To switch models, open a new session window.**
+
 
 - **Protocol Translation**: Responses API ↔ Chat Completions bidirectional
 - **Dual Version Coexistence**: DeepSeek and MiniMax run simultaneously on different ports

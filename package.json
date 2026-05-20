@@ -6,13 +6,6 @@
     "scripts": {
         "start:deepseek": "node index.deepseek.js",
         "start:minimax": "node index.minimax.js",
-        "start": "node index.deepseek.js",
-        "start:all": "node index.deepseek.js & node index.minimax.js & wait",
-        "stop:all": "pkill -f 'node index.deepseek.js' && pkill -f 'node index.minimax.js'",
-        "pm2:start": "pm2 start pm2.config.cjs",
-        "pm2:stop": "pm2 stop all",
-        "pm2:restart": "pm2 restart all",
-        "pm2:logs": "pm2 logs",
         "test": "node --test test_translate.js",
         "test:translate": "node --test test_translate.js"
     },
