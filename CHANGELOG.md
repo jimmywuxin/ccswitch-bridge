@@ -41,7 +41,7 @@
 
 - `lib/server.js` — 认证头从硬编码 `Authorization` 改为可配置
 
-## [1.1.2] — 2026-05-??
+## [1.1.2] — 2026-05-24
 
 ### Fixed
 
@@ -50,7 +50,7 @@
 - `lib/recover.js` — 移除 sessionStore TTL 逻辑，简化记忆管理
 - `lib/recover.js` — 修复 `sessionKey` 碰撞问题
 
-## [1.1.1] — 2026-05-??
+## [1.1.1] — 2026-05-20
 
 ### Added
 
@@ -60,14 +60,14 @@
 
 - SwiftBar 脚本增加健康检查（自动重启崩溃的服务）
 
-## [1.1.0] — 2026-05-??
+## [1.1.0] — 2026-05-20
 
 ### Added
 
 - **MiniMax 支持** — 新增第二个 provider：MiniMax (`Minimax-M2.7`)，独立端口 11436
 - **SwiftBar 插件** — `swiftbar/ccswitch.5s.sh` 菜单栏管理工具
 
-## [1.0.0] — 2026-05-??
+## [1.0.0] — 2026-05-18
 
 ### Added
 
