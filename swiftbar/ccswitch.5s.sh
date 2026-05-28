@@ -20,6 +20,7 @@ fi
 
 PORT_DEEPSEEK=11435
 PORT_MINIMAX=11436
+PORT_MIMO=11437
 HEALTH_CHECK_INTERVAL=30  # seconds between health checks
 
 running_on_port() {
@@ -88,18 +89,23 @@ echo "🧠"
 echo "---"
 echo "DeepSeek :11435  $(human_status "$PORT_DEEPSEEK") | font=menlo size=11"
 echo "MiniMax  :11436  $(human_status "$PORT_MINIMAX")  | font=menlo size=11"
+echo "MiMo     :11437  $(human_status "$PORT_MIMO")   | font=menlo size=11"
 echo "---"
 echo "🌊 Start DeepSeek | bash='$0' param1=start param2=deepseek refresh=true terminal=false"
 echo "🔶 Start MiniMax  | bash='$0' param1=start param2=minimax refresh=true terminal=false"
+echo "🍥 Start MiMo     | bash='$0' param1=start param2=mimo refresh=true terminal=false"
 echo "---"
 echo "🔄 Restart DeepSeek | bash='$0' param1=restart param2=deepseek refresh=true terminal=false"
 echo "🔄 Restart MiniMax  | bash='$0' param1=restart param2=minimax refresh=true terminal=false"
+echo "🔄 Restart MiMo     | bash='$0' param1=restart param2=mimo refresh=true terminal=false"
 echo "---"
 echo "🛑 Stop DeepSeek | bash='$0' param1=stop param2=deepseek refresh=true terminal=false"
 echo "🛑 Stop MiniMax  | bash='$0' param1=stop param2=minimax refresh=true terminal=false"
+echo "🛑 Stop MiMo     | bash='$0' param1=stop param2=mimo refresh=true terminal=false"
 echo "---"
 echo "📋 View DeepSeek Log | bash='$0' param1=log param2=deepseek terminal=true"
 echo "📋 View MiniMax Log  | bash='$0' param1=log param2=minimax terminal=true"
+echo "📋 View MiMo Log     | bash='$0' param1=log param2=mimo terminal=true"
 echo "---"
 echo "🔗 GitHub | href=https://github.com/jimmywuxin/ccswitch-bridge"
 
@@ -109,25 +115,30 @@ case "$1" in
         case "$2" in
             deepseek) start_model "deepseek" "index.deepseek.js" "$PORT_DEEPSEEK" ;;
             minimax)  start_model "minimax"  "index.minimax.js"  "$PORT_MINIMAX" ;;
+            mimo)     start_model "mimo"     "index.mimo.js"     "$PORT_MIMO" ;;
         esac ;;
     stop)
         case "$2" in
             deepseek) stop_model "deepseek" "$PORT_DEEPSEEK" ;;
             minimax)  stop_model "minimax"  "$PORT_MINIMAX" ;;
+            mimo)     stop_model "mimo"     "$PORT_MIMO" ;;
         esac ;;
     restart)
         case "$2" in
             deepseek) restart_model "deepseek" "index.deepseek.js" "$PORT_DEEPSEEK" ;;
             minimax)  restart_model "minimax"  "index.minimax.js"  "$PORT_MINIMAX" ;;
+            mimo)     restart_model "mimo"     "index.mimo.js"     "$PORT_MIMO" ;;
         esac ;;
     log)
         case "$2" in
             deepseek) cat /tmp/ccswitch-deepseek.log 2>/dev/null || echo "(empty)"; echo; echo "=== following ==="; tail -f /tmp/ccswitch-deepseek.log ;;
             minimax)  cat /tmp/ccswitch-minimax.log 2>/dev/null  || echo "(empty)"; echo; echo "=== following ==="; tail -f /tmp/ccswitch-minimax.log ;;
+            mimo)     cat /tmp/ccswitch-mimo.log 2>/dev/null     || echo "(empty)"; echo; echo "=== following ==="; tail -f /tmp/ccswitch-mimo.log ;;
         esac ;;
     *)
         # No action specified: run health checks silently in background
         health_check "deepseek" "index.deepseek.js" "$PORT_DEEPSEEK" &
         health_check "minimax"  "index.minimax.js"  "$PORT_MINIMAX" &
+        health_check "mimo"     "index.mimo.js"     "$PORT_MIMO" &
         ;;
 esac

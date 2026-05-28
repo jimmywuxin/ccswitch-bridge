@@ -4,29 +4,31 @@
 
 ---
 
-Enable **Codex CLI** / **Codex desktop client** to run through **DeepSeek** or **MiniMax** models.
+Enable **Codex CLI** / **Codex desktop client** to run through **DeepSeek**, **MiniMax**, or **Xiaomi MiMo** models.
 
-Codex uses the Responses API protocol, while DeepSeek / MiniMax only provide Chat Completions API. This project starts a local protocol translation proxy to seamlessly bridge the two.
+Codex uses the Responses API protocol, while DeepSeek / MiniMax / MiMo only provide Chat Completions API. This project starts a local protocol translation proxy to seamlessly bridge the two.
 
 ## Architecture
 
 ```
-Codex Client ──Responses API──▶ ccswitch-bridge :11435/11436 ──Chat API──▶ DeepSeek/MiniMax API
+Codex Client ──Responses API──▶ ccswitch-bridge :11435/11436/11437 ──Chat API──▶ DeepSeek/MiniMax/MiMo API
                                         protocol translation
 ```
 
-## Dual Version Support
+## Multi-Model Support
 
 | Version | Port | Model | URL |
 |---------|------|-------|-----|
 | DeepSeek | 11435 | deepseek-v4-pro | http://127.0.0.1:11435/v1 |
 | MiniMax | 11436 | MiniMax-Text-01 | http://127.0.0.1:11436/v1 |
+| Xiaomi MiMo | 11437 | mimo-v2.5-pro | http://127.0.0.1:11437/v1 |
 
 ## Prerequisites
 
 - Node.js >= 18
 - DeepSeek API Key (get it: https://platform.deepseek.com/api_keys)
 - MiniMax API Key (get it: https://platform.minimaxi.com/api_keys)
+- Xiaomi MiMo API Key (get it: https://platform.xiaomimimo.com)
 
 ## Quick Start
 
@@ -46,6 +48,9 @@ DEEPSEEK_API_KEY=sk-your-deepseek-api-key
 
 # MiniMax
 MINIMAX_API_KEY=your-minimax-api-key
+
+# Xiaomi MiMo (format: tp-xxxxx)
+MIMO_API_KEY=tp-your-mimo-api-key
 ```
 
 ### 3. Start Services
@@ -83,6 +88,7 @@ pm2 runs in the background and automatically restores after reboot.
 ```bash
 npm run start:deepseek   # DeepSeek only, port 11435
 npm run start:minimax    # MiniMax only, port 11436
+npm run start:mimo       # Xiaomi MiMo only, port 11437
 ```
 
 ### 4. Configure CCSwitch
@@ -91,6 +97,7 @@ In CCSwitch desktop app:
 
 - **DeepSeek**: API URL → `http://127.0.0.1:11435/v1`
 - **MiniMax**: API URL → `http://127.0.0.1:11436/v1`
+- **Xiaomi MiMo**: API URL → `http://127.0.0.1:11437/v1`
 
 ## Codex CLI Users
 
@@ -134,10 +141,30 @@ tool_search = false
 tool_search_always_defer_mcp_tools = false
 ```
 
+**Xiaomi MiMo profile:**
+```toml
+[model_providers.mimo]
+base_url = "http://127.0.0.1:11437/v1"
+wire_api = "responses"
+requires_openai_auth = false
+stream_idle_timeout_ms = 300000
+
+[profiles.mimo-v2.5-pro]
+model_provider = "mimo"
+model_name = "mimo-v2.5-pro"
+context_window = 1000000
+max_output_tokens = 32768
+
+[profiles.mimo-v2.5-pro.features]
+tool_search = false
+tool_search_always_defer_mcp_tools = false
+```
+
 Run with:
 ```bash
 codex --profile deepseek-v4-pro   # DeepSeek
 codex --profile minimax-text-01  # MiniMax
+codex --profile mimo-v2.5-pro    # Xiaomi MiMo
 ```
 
 ## Environment Variables

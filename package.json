@@ -1,11 +1,12 @@
 {
     "name": "ccswitch-bridge",
-    "version": "1.0.0",
-    "description": "Codex CLI DeepSeek/MiniMax protocol translation proxy",
+    "version": "1.2.0",
+    "description": "Codex CLI DeepSeek/MiniMax/MiMo protocol translation proxy",
     "type": "module",
     "scripts": {
         "start:deepseek": "node index.deepseek.js",
         "start:minimax": "node index.minimax.js",
+        "start:mimo": "node index.mimo.js",
         "test": "node --test test_translate.js",
         "test:translate": "node --test test_translate.js"
     },
@@ -13,6 +14,8 @@
         "codex",
         "deepseek",
         "minimax",
+        "mimo",
+        "xiaomi",
         "proxy",
         "protocol-translation",
         "responses-api",
