@@ -170,6 +170,7 @@ codex --profile mimo-v2.5-pro    # 小米 MiMo
 | `MIMO_PROXY_PORT` | `11437` | MiMo 版监听端口 |
 | `MIMO_MODEL` | `mimo-v2.5-pro` | MiMo 模型名 |
 | `MIMO_API_HOST` | `token-plan-cn.xiaomimimo.com` | MiMo API 集群（中国） |
+| `LOG_LEVEL` | `debug` | 日志级别：`debug` / `info` / `warn` / `error` |
 
 ## 功能
 

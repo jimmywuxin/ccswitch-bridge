@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.2.1] — 2026-05-28
+
+### Security
+
+- **请求体验证** — `/v1/responses` 端点增加 `input` 类型校验，非法输入返回 400
+- **密码学安全 ID** — 响应 ID 生成从 `Math.random()` 升级为 `crypto.randomUUID()`
+- **sessionKey 碰撞加固** — hash 后缀从 4 位扩展到 8 位 hex（16 bit → 32 bit）
+
+### Fixed
+
+- **SSE think 缓冲区溢出保护** — MiniMax 内联 `<think>` 缓冲区增加 100KB 上限，防止无限增长导致 OOM
+- **SSE 解析器 Buffer 化** — 多字节 UTF-8 字符在 chunk 边界不再被截断
+- **日志级别控制** — 新增 `LOG_LEVEL` 环境变量（debug/info/warn/error），可按需收紧日志输出
+
+### Changed
+
+- **移除未使用的 axios 依赖** — 清理 21 个冗余包
+- **统一 dotenv 加载** — 仅在 `lib/server.js` 入口加载，移除 provider 中的重复调用
+- **移除未使用的 splitThinking 导入** — `providers/deepseek.js` 清理
+
+### Tests
+
+- 新增 `test_recover.js` — 9 个测试覆盖 `rememberReasoning`、`recoverReasoning`、`sessionKey`
+- 测试总数从 29 增至 38
+
 ## [1.2.0] — 2026-05-27
 
 ### Added

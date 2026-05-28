@@ -1,4 +1,3 @@
-import dotenv from "dotenv"; dotenv.config({ override: true });
 // Xiaomi MiMo provider configuration
 // Standard OpenAI-compatible Chat Completions API, with custom api-key auth header.
 

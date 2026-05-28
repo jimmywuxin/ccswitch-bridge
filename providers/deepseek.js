@@ -1,8 +1,6 @@
-import dotenv from "dotenv"; dotenv.config({ override: true });
 // DeepSeek provider configuration
 // DeepSeek uses reasoning_content as a separate field (not inline <think> tags).
 
-import { splitThinking } from "../lib/translate.js";
 
 export const config = {
   name: "ccswitch-deepseek",

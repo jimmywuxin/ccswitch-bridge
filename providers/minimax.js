@@ -1,4 +1,3 @@
-import dotenv from "dotenv"; dotenv.config({ override: true });
 // MiniMax provider configuration
 // MiniMax embeds thinking content as <think>...</think> tags inside the content field.
 

@@ -1,13 +1,13 @@
 {
     "name": "ccswitch-bridge",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "Codex CLI DeepSeek/MiniMax/MiMo protocol translation proxy",
     "type": "module",
     "scripts": {
         "start:deepseek": "node index.deepseek.js",
         "start:minimax": "node index.minimax.js",
         "start:mimo": "node index.mimo.js",
-        "test": "node --test test_translate.js",
+        "test": "node --test test_translate.js test_recover.js test_sse.js",
         "test:translate": "node --test test_translate.js"
     },
     "keywords": [
@@ -24,7 +24,6 @@
     "author": "Jimmy Wu Xin",
     "license": "ISC",
     "dependencies": {
-        "axios": "^1.16.0",
         "dotenv": "^17.4.2"
     },
     "devDependencies": {
