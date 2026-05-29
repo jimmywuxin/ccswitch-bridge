@@ -15,7 +15,7 @@ if [ -f "$SCRIPT_DIR/package.json" ] && [ -f "$SCRIPT_DIR/index.deepseek.js" ]; 
 elif [ -f "$(dirname "$SCRIPT_DIR")/package.json" ] && [ -f "$(dirname "$SCRIPT_DIR")/index.deepseek.js" ]; then
     PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 else
-    PROJECT_DIR="$HOME/ccswitch-bridge"
+    PROJECT_DIR="$HOME/dev/ccswitch-bridge"
 fi
 
 PORT_DEEPSEEK=11435
