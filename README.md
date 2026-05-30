@@ -66,6 +66,8 @@ npm run start:mimo       # 仅小米 MiMo，端口 11437
 
 > SwiftBar 脚本仅提供**全体启停**（Start/Stop/Restart All）和统一日志查看。
 > 不提供单服务切换——三个模型同时运行，通过 Codex profile 选择模型即可。
+>
+> 脚本通过自动检测找到项目目录：先检查自身所在目录是否有 `package.json` + `providers.json`，再检查父目录（适配 `swiftbar/` 子目录结构），最后兜底到 `~/dev/ccswitch-bridge`。因此将脚本复制到 SwiftBar 插件目录不影响正常工作。
 
 1. 安装 [SwiftBar](https://swiftbar.app/)（`brew install --cask swiftbar`）
 2. 在 SwiftBar 偏好设置中指定插件目录（如 `~/SwiftBar`）
@@ -73,10 +75,11 @@ npm run start:mimo       # 仅小米 MiMo，端口 11437
 
    ```bash
    cp swiftbar/ccswitch.5s.sh ~/SwiftBar/
+   chmod +x ~/SwiftBar/ccswitch.5s.sh
    ```
 
 4. 菜单栏点击 🧠 图标，显示各端口运行状态（✅/❌），可执行：
-   - **🚀 Start All** — 同时启动三个模型
+   - **🚀 Start All** — 同时启动三个模型。脚本从项目目录读取 `providers.json` 和 `package.json`，通过 `npm start`（执行 `node index.js`）启动
    - **🛑 Stop All** — 停止所有服务
    - **🔄 Restart All** — 重启所有服务
    - **📋 View All Log** — 在终端中实时查看统一日志
@@ -159,7 +162,7 @@ codex --profile mimo-v2.5-pro    # 小米 MiMo
 
 ## 新增模型
 
-新增一个大模型只需两步，无需写代码：
+新增一个大模型只需两步，无需写代码。所有模型配置集中在项目根目录的 `providers.json` 中，SwiftBar 脚本和 `npm start` 都会读取该文件。
 
 ### 1. 添加 API Key 到钥匙串
 
@@ -191,7 +194,7 @@ security add-generic-password -s "NEW_MODEL_API_KEY" -w "sk-your-api-key"
 }
 ```
 
-重启服务即可：
+重启服务即可（`npm start` 读取 `providers.json` 启动所有 provider；SwiftBar 的 Start All 同样读取该文件）：
 
 ```bash
 npm start
