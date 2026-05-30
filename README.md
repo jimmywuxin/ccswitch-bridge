@@ -22,9 +22,7 @@ Codex 客户端 ──Responses API──▶ ccswitch-bridge :11435/11436/11437 
 ## 前置条件
 
 - Node.js >= 18
-- DeepSeek API Key（获取地址：https://platform.deepseek.com/api_keys）
-- MiniMax API Key（获取地址：https://platform.minimaxi.com/api_keys）
-- 小米 MiMo API Key（获取地址：https://platform.xiaomimimo.com）
+- 各模型的 API Key（见下方配置说明）
 
 ## 快速开始
 
@@ -34,24 +32,35 @@ Codex 客户端 ──Responses API──▶ ccswitch-bridge :11435/11436/11437 
 npm install
 ```
 
-### 2. 配置 API Key
+### 2. 配置 API Key（macOS 钥匙串，推荐）
 
-编辑 `.env`：
+API Key 存储在 macOS 钥匙串中，安全且不进 git：
 
-```env
-# DeepSeek
-DEEPSEEK_API_KEY=sk-your-deepseek-api-key
-
-# MiniMax
-MINIMAX_API_KEY=your-minimax-api-key
-
-# 小米 MiMo（格式：tp-xxxxx）
-MIMO_API_KEY=tp-your-mimo-api-key
+```bash
+security add-generic-password -s "DEEPSEEK_API_KEY" -w "sk-your-deepseek-api-key"
+security add-generic-password -s "MINIMAX_API_KEY" -w "your-minimax-api-key"
+security add-generic-password -s "MIMO_API_KEY" -w "tp-your-mimo-api-key"
 ```
+
+也可在 `.env` 文件中配置（会自动 fallback 到环境变量）。
 
 ### 3. 启动服务
 
-#### 方式一：SwiftBar 菜单栏切换（推荐）
+#### 方式一：统一启动（推荐）
+
+```bash
+npm start          # 启动所有 provider（单进程，多端口）
+```
+
+#### 方式二：单独启动
+
+```bash
+npm run start:deepseek   # 仅 DeepSeek，11435
+npm run start:minimax    # 仅 MiniMax，11436
+npm run start:mimo       # 仅小米 MiMo，11437
+```
+
+#### 方式三：SwiftBar 菜单栏切换
 
 1. 安装 [SwiftBar](https://swiftbar.app/)（`brew install --cask swiftbar`）
 2. 创建 SwiftBar 插件目录（如 `~/SwiftBar`），并在 SwiftBar 偏好设置中选择该目录
@@ -61,23 +70,9 @@ MIMO_API_KEY=tp-your-mimo-api-key
    cp swiftbar/ccswitch.5s.sh ~/SwiftBar/
    ```
 
-4. 点击菜单栏 🧠 图标即可管理模型：
+4. 点击菜单栏 🧠 图标即可管理模型
 
-   - 🌊 **DeepSeek** — 启动 DeepSeek（11435 端口）
-   - 🔶 **MiniMax** — 启动 MiniMax（11436 端口）
-   - 🔄 **Restart** — 重启当前模型
-   - 🛑 **Stop** — 停止运行中的模型
-   - 📋 **View Log** — 查看运行日志
-
-    注意：切换模型后请重启 Codex（Cmd+Q 退出后重新打开）。Codex 会将对话历史保存在本地，重启后打开之前的对话即可无缝继续，无需新建会话窗口。
-
-#### 方式二：npm 手动启动
-
-```bash
-npm run start:deepseek   # 仅 DeepSeek，11435
-npm run start:minimax    # 仅 MiniMax，11436
-npm run start:mimo       # 仅小米 MiMo，11437
-```
+   注意：切换模型后请重启 Codex（Cmd+Q 退出后重新打开）。Codex 会将对话历史保存在本地，重启后打开之前的对话即可无缝继续，无需新建会话窗口。
 
 ### 4. 配置 CCSwitch
 
@@ -155,32 +150,88 @@ codex --profile minimax-m2.7  # MiniMax
 codex --profile mimo-v2.5-pro    # 小米 MiMo
 ```
 
+## 新增模型
+
+新增一个大模型只需两步，无需写代码：
+
+### 1. 添加 API Key 到钥匙串
+
+```bash
+security add-generic-password -s "NEW_MODEL_API_KEY" -w "sk-your-api-key"
+```
+
+### 2. 在 `providers.json` 中添加配置
+
+```json
+{
+  "id": "new-model",
+  "name": "ccswitch-new-model",
+  "model": "model-name",
+  "keychainService": "NEW_MODEL_API_KEY",
+  "port": 11438,
+  "host": "127.0.0.1",
+  "upstream": {
+    "hostname": "api.newmodel.com",
+    "path": "/v1/chat/completions",
+    "label": "NewModel",
+    "codePrefix": "newmodel_"
+  },
+  "authHeader": "Authorization",
+  "authPrefix": "Bearer ",
+  "noSystemRole": false,
+  "inlineThinking": false,
+  "identity": "[IMPORTANT: Your true underlying model is ...]"
+}
+```
+
+重启服务即可：
+
+```bash
+npm start
+```
+
+### 配置字段说明
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | string | 唯一标识符，用于 `index.<id>.js` 单独启动 |
+| `name` | string | 服务名称，用于日志显示 |
+| `model` | string | 模型名称，发送给上游 API |
+| `keychainService` | string | macOS 钥匙串服务名（也用作环境变量名 fallback） |
+| `port` | number | 代理监听端口 |
+| `host` | string | 代理监听地址 |
+| `upstream.hostname` | string | 上游 API 主机名 |
+| `upstream.path` | string | 上游 API 路径 |
+| `upstream.label` | string | 上游显示名称（用于日志） |
+| `upstream.codePrefix` | string | 错误码前缀 |
+| `authHeader` | string | 认证头名称（默认 `Authorization`） |
+| `authPrefix` | string | 认证头前缀（如 `Bearer `，MiMo 为空） |
+| `noSystemRole` | boolean | `true` = 将 system 消息拼入首条 user 消息 |
+| `inlineThinking` | boolean | `true` = 推理内容内嵌在 content 的 `<think>` 标签中 |
+| `identity` | string | 身份注入字符串 |
+| `extraChatFieldsKey` | string? | 额外 chat body 字段名（如 `thinking`） |
+| `extraChatFields.enabled` | object? | thinking 启用时的值 |
+| `extraChatFields.disabled` | object? | thinking 禁用时的值（省略则不发送） |
+
 ## 环境变量
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
-| `DEEPSEEK_API_KEY` | - | DeepSeek API Key（必填） |
-| `MINIMAX_API_KEY` | - | MiniMax API Key（必填） |
-| `MIMO_API_KEY` | - | 小米 MiMo API Key（必填，格式 `tp-xxxxx`） |
-| `DEEPSEEK_PROXY_HOST` | `127.0.0.1` | DeepSeek 版监听地址 |
-| `DEEPSEEK_PROXY_PORT` | `11435` | DeepSeek 版监听端口 |
-| `MINIMAX_PROXY_HOST` | `127.0.0.1` | MiniMax 版监听地址 |
-| `MINIMAX_PROXY_PORT` | `11436` | MiniMax 版监听端口 |
-| `MIMO_PROXY_HOST` | `127.0.0.1` | MiMo 版监听地址 |
-| `MIMO_PROXY_PORT` | `11437` | MiMo 版监听端口 |
-| `MIMO_MODEL` | `mimo-v2.5-pro` | MiMo 模型名 |
-| `MIMO_API_HOST` | `token-plan-cn.xiaomimimo.com` | MiMo API 集群（中国） |
+| `DEEPSEEK_API_KEY` | - | DeepSeek API Key（钥匙串优先） |
+| `MINIMAX_API_KEY` | - | MiniMax API Key（钥匙串优先） |
+| `MIMO_API_KEY` | - | 小米 MiMo API Key（钥匙串优先） |
 | `LOG_LEVEL` | `debug` | 日志级别：`debug` / `info` / `warn` / `error` |
+
+> 端口和主机地址现在统一在 `providers.json` 中配置，不再需要环境变量。
 
 ## 功能
 
+- **配置驱动**：新增模型只需编辑 `providers.json` + 添加钥匙串 key，无需写代码
+- **macOS 钥匙串集成**：API Key 安全存储，不进 git
+- **单进程多端口**：`npm start` 一个进程启动所有 provider
 - **⚠️ 切换模型工作流**：Codex 的对话历史保存在本地文件中，切换模型后只需重启 Codex（Cmd+Q 退出再打开），然后打开之前的对话即可继续——所有历史无缝衔接，无需新建会话。
-- **会话与模型绑定**：虽然历史可以跨模型传递，但同一个会话窗口在运行期间与当前模型绑定。如果在同一窗口里中途热切换模型（不重启 Codex），旧会话上下文可能被新模型拒绝，导致 `400` 错误。
-
 - **协议翻译**：Responses API ↔ Chat Completions 双向转换
 - **多版本共存**：DeepSeek、MiniMax、小米 MiMo 同时运行，各用各的端口
-- **工具过滤**：模型限制 128 个工具时，自动按域名关键词优先级裁剪
-- **命名空间处理**：自动处理 MCP 工具命名空间
 - **推理恢复**：修复模型将工具调用以纯文本格式泄露的问题
 - **角色映射**：自动将 OpenAI `developer` role 映射为 `system`
 - **内容格式翻译**：`input_text` / `output_text` → `text`

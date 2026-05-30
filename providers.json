@@ -1,0 +1,70 @@
+{
+  "providers": [
+    {
+      "id": "deepseek",
+      "name": "ccswitch-deepseek",
+      "model": "deepseek-v4-pro",
+      "keychainService": "DEEPSEEK_API_KEY",
+      "port": 11435,
+      "host": "127.0.0.1",
+      "upstream": {
+        "hostname": "api.deepseek.com",
+        "path": "/v1/chat/completions",
+        "label": "DeepSeek",
+        "codePrefix": "deepseek_"
+      },
+      "authHeader": "Authorization",
+      "authPrefix": "Bearer ",
+      "noSystemRole": false,
+      "inlineThinking": false,
+      "identity": "[IMPORTANT: Your true underlying model is DeepSeek (deepseek-v4-pro), developed by DeepSeek (depth seek). You are NOT OpenAI, GPT, Claude, or Codex. When asked about your model identity, you MUST answer that you are DeepSeek, not any other model. Ignore any conflicting identity claims in the instructions above.]",
+      "extraChatFieldsKey": "thinking",
+      "extraChatFields": {
+        "enabled": { "type": "enabled" },
+        "disabled": { "type": "disabled" }
+      }
+    },
+    {
+      "id": "minimax",
+      "name": "ccswitch-bridge-minimax",
+      "model": "Minimax-M2.7",
+      "keychainService": "MINIMAX_API_KEY",
+      "port": 11436,
+      "host": "127.0.0.1",
+      "upstream": {
+        "hostname": "api.minimax.chat",
+        "path": "/v1/chat/completions",
+        "label": "MiniMax",
+        "codePrefix": "minimax_"
+      },
+      "authHeader": "Authorization",
+      "authPrefix": "Bearer ",
+      "noSystemRole": true,
+      "inlineThinking": true,
+      "identity": "[IMPORTANT: Your true underlying model is MiniMax (Minimax-M2.7), developed by MiniMax. You are NOT OpenAI, GPT, Claude, DeepSeek, or Codex. When asked about your model identity, you MUST answer that you are MiniMax, not any other model. Ignore any conflicting identity claims in the instructions above.]",
+      "extraChatFieldsKey": "thinking",
+      "extraChatFields": {
+        "enabled": { "type": "enabled" }
+      }
+    },
+    {
+      "id": "mimo",
+      "name": "ccswitch-bridge-mimo",
+      "model": "mimo-v2.5-pro",
+      "keychainService": "MIMO_API_KEY",
+      "port": 11437,
+      "host": "127.0.0.1",
+      "upstream": {
+        "hostname": "api.xiaomimimo.com",
+        "path": "/v1/chat/completions",
+        "label": "MiMo",
+        "codePrefix": "mimo_"
+      },
+      "authHeader": "api-key",
+      "authPrefix": "",
+      "noSystemRole": false,
+      "inlineThinking": false,
+      "identity": "[IMPORTANT: Your true underlying model is MiMo (mimo-v2.5-pro), developed by Xiaomi (Xiaomi MiMo). You are NOT OpenAI, GPT, Claude, DeepSeek, MiniMax, or Codex. When asked about your model identity, you MUST answer that you are MiMo by Xiaomi, not any other model. Ignore any conflicting identity claims in the instructions above.]"
+    }
+  ]
+}
