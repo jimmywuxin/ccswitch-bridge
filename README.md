@@ -16,7 +16,7 @@ Codex 客户端 ──Responses API──▶ ccswitch-bridge :11435/11436/11437 
 | 版本 | 端口 | 模型 | 地址 |
 |------|------|------|------|
 | DeepSeek | 11435 | deepseek-v4-pro | http://127.0.0.1:11435/v1 |
-| MiniMax | 11436 | MiniMax-Text-01 | http://127.0.0.1:11436/v1 |
+| MiniMax | 11436 | Minimax-M2.7 | http://127.0.0.1:11436/v1 |
 | 小米 MiMo | 11437 | mimo-v2.5-pro | http://127.0.0.1:11437/v1 |
 
 ## 前置条件
@@ -118,13 +118,13 @@ wire_api = "responses"
 requires_openai_auth = false
 stream_idle_timeout_ms = 300000
 
-[profiles.minimax-text-01]
+[profiles.minimax-m2.7]
 model_provider = "minimax"
-model_name = "MiniMax-Text-01"
+model_name = "Minimax-M2.7"
 context_window = 1000000
 max_output_tokens = 32768
 
-[profiles.minimax-text-01.features]
+[profiles.minimax-m2.7.features]
 tool_search = false
 tool_search_always_defer_mcp_tools = false
 ```
@@ -151,7 +151,7 @@ tool_search_always_defer_mcp_tools = false
 使用：
 ```bash
 codex --profile deepseek-v4-pro   # DeepSeek
-codex --profile minimax-text-01  # MiniMax
+codex --profile minimax-m2.7  # MiniMax
 codex --profile mimo-v2.5-pro    # 小米 MiMo
 ```
 

@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.2.3] — 2026-05-30
+
+### Security
+
+- **推理项 ID 安全修复** — `lib/sse.js` 推理项 ID 生成从 `Math.random()` 补齐为 `crypto.randomUUID()`，与 v1.2.1 安全审计目标一致
+
+### Fixed
+
+- **SSE inline thinking 丢弃 tool calls** — 修复 `feed()` 中 inline thinking 的 early return 导致同一 chunk 中的 tool calls 被静默丢弃的问题
+- **SSE inline think 缓冲区未 flush** — 修复 `done()` 未 flush 残留 think buffer 导致无 `</think>` 标签的响应内容丢失
+
+### Changed
+
+- **README 模型名统一** — 文档中 MiniMax 模型名从 `MiniMax-Text-01` 修正为 `Minimax-M2.7`，与代码一致
+- **README_EN.md 全面更新** — 移除不存在的 pm2/start:all scripts，改为 SwiftBar + npm 手动启动；补充 MiMo 环境变量和 Features 描述
+
+### Tests
+
+- 新增 `test_sse.js` — 12 个测试覆盖 `SseTranslator`（inline think、tool calls、reasoning、done 输出结构、edge cases）
+- 测试总数从 38 增至 50
+
+
 ## [1.2.2] — 2026-05-30
 
 ### Fixed
