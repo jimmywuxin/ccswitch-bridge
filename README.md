@@ -49,30 +49,37 @@ security add-generic-password -s "MIMO_API_KEY" -w "tp-your-mimo-api-key"
 #### 方式一：统一启动（推荐）
 
 ```bash
-npm start          # 启动所有 provider（单进程，多端口）
+npm start          # 单进程启动 DeepSeek + MiniMax + MiMo（三个端口同时运行）
 ```
 
-#### 方式二：单独启动
+三个模型同时在 11435/11436/11437 端口运行，无需启停切换。通过 Codex 的 `--profile` 参数即可选择不同模型。
+
+#### 方式二：单独启动某个模型
 
 ```bash
-npm run start:deepseek   # 仅 DeepSeek，11435
-npm run start:minimax    # 仅 MiniMax，11436
-npm run start:mimo       # 仅小米 MiMo，11437
+npm run start:deepseek   # 仅 DeepSeek，端口 11435
+npm run start:minimax    # 仅 MiniMax，端口 11436
+npm run start:mimo       # 仅小米 MiMo，端口 11437
 ```
 
-#### 方式三：SwiftBar 菜单栏切换
+#### 方式三：SwiftBar 菜单栏控制
+
+> SwiftBar 脚本仅提供**全体启停**（Start/Stop/Restart All）和统一日志查看。
+> 不提供单服务切换——三个模型同时运行，通过 Codex profile 选择模型即可。
 
 1. 安装 [SwiftBar](https://swiftbar.app/)（`brew install --cask swiftbar`）
-2. 创建 SwiftBar 插件目录（如 `~/SwiftBar`），并在 SwiftBar 偏好设置中选择该目录
-3. 将 `swiftbar/ccswitch.5s.sh` 复制到 SwiftBar 插件目录：
+2. 在 SwiftBar 偏好设置中指定插件目录（如 `~/SwiftBar`）
+3. 将脚本复制到插件目录：
 
    ```bash
    cp swiftbar/ccswitch.5s.sh ~/SwiftBar/
    ```
 
-4. 点击菜单栏 🧠 图标即可管理模型
-
-   注意：切换模型后请重启 Codex（Cmd+Q 退出后重新打开）。Codex 会将对话历史保存在本地，重启后打开之前的对话即可无缝继续，无需新建会话窗口。
+4. 菜单栏点击 🧠 图标，显示各端口运行状态（✅/❌），可执行：
+   - **🚀 Start All** — 同时启动三个模型
+   - **🛑 Stop All** — 停止所有服务
+   - **🔄 Restart All** — 重启所有服务
+   - **📋 View All Log** — 在终端中实时查看统一日志
 
 ### 4. 配置 CCSwitch
 
@@ -229,7 +236,7 @@ npm start
 - **配置驱动**：新增模型只需编辑 `providers.json` + 添加钥匙串 key，无需写代码
 - **macOS 钥匙串集成**：API Key 安全存储，不进 git
 - **单进程多端口**：`npm start` 一个进程启动所有 provider
-- **⚠️ 切换模型工作流**：Codex 的对话历史保存在本地文件中，切换模型后只需重启 Codex（Cmd+Q 退出再打开），然后打开之前的对话即可继续——所有历史无缝衔接，无需新建会话。
+- **⚠️ 切换模型**：所有模型同时运行在不同端口。要切换模型，在 Codex 配置中指定对应 profile（如 `--profile minimax-m2.7`），重启 Codex 后之前的对话历史无缝衔接，无需新建会话。
 - **协议翻译**：Responses API ↔ Chat Completions 双向转换
 - **多版本共存**：DeepSeek、MiniMax、小米 MiMo 同时运行，各用各的端口
 - **推理恢复**：修复模型将工具调用以纯文本格式泄露的问题
