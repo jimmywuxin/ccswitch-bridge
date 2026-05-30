@@ -1,5 +1,22 @@
 # Changelog
 
+
+## [1.3.0] — 2026-05-30
+
+### Changed
+
+- **SwiftBar 精简** — 移除单服务启停/重启/日志菜单项，统一为 Start/Stop/Restart All + 统一日志查看（v1.4.0）
+- **配置驱动启动** — 新增 `index.js` 统一入口、`lib/keychain.js` 密钥管理、`providers.json` 多 provider 配置
+
+### Fixed
+
+- **MiMo BASE URL 更新** — 上游地址从 `token-plan-cn.xiaomimimo.com` 切换为 `api.xiaomimimo.com`（按量付费新域名）
+
+### Added
+
+- 新增 `lib/keychain.js` — macOS Keychain 密钥读取（支持环境变量 fallback）
+- 新增 `providers.json` — 多 provider 集中配置
+
 ## [1.2.3] — 2026-05-30
 
 ### Security
